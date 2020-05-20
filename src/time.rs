@@ -52,5 +52,7 @@ use crate::device::Device;
 pub(crate) fn delay_ms(device: &Device, ms: u32) {
     let now = device.rtt_get_value();
     let next = now.checked_add(ms).expect("Correctly handle overflow");
-    while device.rtt_get_value() < next {}
+    while device.rtt_get_value() < next {
+        Device::spin(10)
+    }
 }

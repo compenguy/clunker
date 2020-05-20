@@ -1,3 +1,4 @@
+use cortex_m::asm;
 use sam3x8e;
 
 pub(crate) struct Device {
@@ -39,5 +40,17 @@ impl Device {
 
     pub(crate) fn led_off(&mut self) {
         self.p.PIOB.codr.write(|w| w.p27().set_bit());
+    }
+
+    pub(crate) fn wait_for_event() {
+        asm::wfe();
+    }
+
+    pub(crate) fn nop() {
+        asm::nop();
+    }
+
+    pub(crate) fn spin(n: u32) {
+        asm::delay(n);
     }
 }
