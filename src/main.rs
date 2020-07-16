@@ -26,8 +26,8 @@ fn main() -> ! {
     // blink
     loop {
         device.led_on();
-        time::delay_ms(&mut device, 1000);
+        time::delay_ms(&mut device, 5000);
         device.led_off();
-        time::delay_ms(&mut device, 1000);
+        time::delay_ms(&mut device, 5000);
     }
 }

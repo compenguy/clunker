@@ -16,6 +16,20 @@ impl Device {
         self.p.PMC.pmc_pcer0.write(|w| w.pid12().set_bit());
     }
 
+    pub(crate) fn rtt_reset(&mut self) {
+        let now = self.rtt_get_value();
+        self.p.RTT.mr.write(|w| w.rttrst().set_bit());
+
+        // Because of the asynchronism between the Slow Clock (SCLK) and the System Clock (MCK),
+        // the restart of the counter and the reset of the RTT_VR current value register is
+        // effective only 2 slow clock cycles after the write of the RTTRST bit in the RTT_MR
+        // register
+        // So we'll spin on the RTT_VR until it reads a lower value than when we started
+        while self.rtt_get_value() > now {
+            Device::spin(1)
+        }
+    }
+
     pub(crate) fn rtt_set_resolution(&mut self, rt_prescale: u16) {
         self.p
             .RTT

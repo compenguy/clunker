@@ -11,24 +11,27 @@ use crate::device::Device;
 // 3. Execute WFE instruction
 //
 // Real-time Timer Mode Register (RTT_MR, 0x400E1A30)
-// TODO: Verify this table
-// 0x0000: 2^16 * SCLK = 1Hz
-// 0x8000 * SCLK =     2Hz
-// 0x4000 * SCLK =     4Hz
-// 0x2000 * SCLK =     8Hz
-// 0x1000 * SCLK =    16Hz
-// 0x0800 * SCLK =    32Hz
-// 0x0400 * SCLK =    64Hz
-// 0x0200 * SCLK =   128Hz
-// 0x0100 * SCLK =   256Hz
-// 0x0080 * SCLK =   512Hz
-// 0x0040 * SCLK =  1024Hz (~1kHz/0.98 ms resolution)
-// 0x0020 * SCLK =  2048Hz
-// 0x0010 * SCLK =  4096Hz
-// 0x0008 * SCLK =  8192Hz
-// 0x0004 * SCLK = 16384Hz
-// 0x0002 * SCLK = 32768Hz
-// 0x0001 * SCLK = 65535Hz (65kHz/25us resolution)
+// (SCLK = 32.768kHz)
+// 0x0000 is special-cased to represent 2^16 (0xFFFF + 1)
+// SCLK / 2^16   =     0.5Hz
+// SCLK / 0x8000 =     1Hz
+// SCLK / 0x4000 =     2Hz
+// SCLK / 0x2000 =     4Hz
+// SCLK / 0x1000 =     8Hz (8Hz/125ms resolution)
+// SCLK / 0x0CCD =     9.9994Hz (100ms resolution)
+// SCLK / 0x0800 =    16Hz
+// SCLK / 0x0400 =    32Hz
+// SCLK / 0x0200 =    64Hz
+// SCLK / 0x0100 =   128Hz
+// SCLK / 0x0080 =   256Hz
+// SCLK / 0x0040 =   512Hz
+// SCLK / 0x0021 =   992Hz (~1kHz/0.993 ms resolution)
+// SCLK / 0x0020 =  1024Hz (~1kHz/0.98 ms resolution)
+// SCLK / 0x0010 =  2048Hz
+// SCLK / 0x0008 =  4096Hz
+// SCLK / 0x0004 =  8192Hz
+// SCLK / 0x0002 = 16384Hz
+// SCLK / 0x0001 = 32768Hz (32.5kHz/50us resolution)
 //
 // RTPRES = 0x0040 for ms < 1000 (accurate to 0.98ms)
 // RTPRES = 0x0200 for 1000 < ms < 5000 (accurate to 7.8ms)
@@ -49,10 +52,14 @@ use crate::device::Device;
 // Real-time Alarm Status (ALMS): 1 alarm has occurred since last read
 //
 // Real-time Timer Increment (RTTINC): 1 timer has incremented since last read
-pub(crate) fn delay_ms(device: &Device, ms: u32) {
+pub(crate) fn delay_ms(device: &mut Device, ms: u32) {
     let now = device.rtt_get_value();
-    let next = now.checked_add(ms).expect("Correctly handle overflow");
-    while device.rtt_get_value() < next {
-        Device::spin(10)
+    if let Some(next) = now.checked_add(ms) {
+        while device.rtt_get_value() < next {
+            Device::spin(10)
+        }
+    } else {
+        device.rtt_reset();
+        delay_ms(device, ms);
     }
 }
