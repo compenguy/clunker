@@ -3,11 +3,12 @@ name = "clunker"
 version = "0.1.0"
 authors = ["Will Page <compenguy@gmail.com>"]
 edition = "2018"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sam3x8e = { version = "0.1", features = ["rt"] }
+atsam3x8e = { git = "https://github.com/compenguy/atsam3x8e.git", features = ["rt"] }
 cortex-m-rt = "0.6"
 cortex-m = "0.6"
 # Put a breakpoint on `rust_begin_unwind` to catch panics:
@@ -24,7 +25,7 @@ version = "0.2"
 default-features = false
 
 [features]
-rt = ["sam3x8e/rt"]
+rt = ["atsam3x8e/rt"]
 
 [profile.release]
 lto = true
