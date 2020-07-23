@@ -11,10 +11,10 @@ impl Device<atsam3x8e::Peripherals> {
     }
 
     pub(crate) fn led_on(&mut self) {
-        self.p.PIOB.odsr.modify(|_, w| w.p27().set_bit());
+        self.p.PIOB.sodr.write_with_zero(|w| w.p27().set_bit());
     }
 
     pub(crate) fn led_off(&mut self) {
-        self.p.PIOB.odsr.modify(|_, w| w.p27().clear_bit());
+        self.p.PIOB.codr.write_with_zero(|w| w.p27().set_bit());
     }
 }
