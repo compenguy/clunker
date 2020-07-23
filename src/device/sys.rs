@@ -37,7 +37,7 @@ impl Device<atsam3x8e::Peripherals> {
         // Wait until xtal oscillator reports ready
         // 0 = not stabilized, 1 = stabilized
         while !self.p.PMC.pmc_sr.read().moscxts().bits() {
-            Self::nop()
+            Self::spin(4)
         }
 
         // Select xtal oscillator
@@ -56,8 +56,8 @@ impl Device<atsam3x8e::Peripherals> {
 
         // Wait until oscillator selection reports ready
         // 0 = done, 1 = in progress
-        while self.p.PMC.pmc_sr.read().moscsels().bits() {
-            Self::nop()
+        while !self.p.PMC.pmc_sr.read().moscsels().bits() {
+            Self::spin(4)
         }
     }
 
@@ -80,7 +80,7 @@ impl Device<atsam3x8e::Peripherals> {
         // Wait until pll is locked
         // 0 = not locked, 1 = locked
         while !self.p.PMC.pmc_sr.read().locka().bits() {
-            Self::nop()
+            Self::spin(4)
         }
     }
 
@@ -95,7 +95,7 @@ impl Device<atsam3x8e::Peripherals> {
         // Wait until master clock reports ready
         // 0 = not ready, 1 = ready
         while !self.p.PMC.pmc_sr.read().mckrdy().bits() {
-            Self::nop()
+            Self::spin(4)
         }
 
         // Set plla clock
@@ -107,7 +107,7 @@ impl Device<atsam3x8e::Peripherals> {
         // Wait until master clock reports ready
         // 0 = not ready, 1 = ready
         while !self.p.PMC.pmc_sr.read().mckrdy().bits() {
-            Self::nop()
+            Self::spin(4)
         }
         self.syscore = CHIP_FREQ_CPU_MAX;
     }
@@ -120,7 +120,8 @@ impl Device<atsam3x8e::Peripherals> {
                 Variant::Val(ckgr_mor::MOSCRCF_A::_4_MHZ) => CHIP_FREQ_MAINCK_RC_4MHZ,
                 Variant::Val(ckgr_mor::MOSCRCF_A::_8_MHZ) => CHIP_FREQ_MAINCK_RC_8MHZ,
                 Variant::Val(ckgr_mor::MOSCRCF_A::_12_MHZ) => CHIP_FREQ_MAINCK_RC_12MHZ,
-                // TODO:
+                // I think this is supposed to be unreachable, but required to cover
+                // all branches
                 Variant::Res(_) => CHIP_FREQ_MAINCK_RC_4MHZ,
             }
         }
