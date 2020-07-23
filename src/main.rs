@@ -5,34 +5,35 @@ use cortex_m_rt::entry;
 extern crate panic_halt;
 
 mod device;
-use crate::device::Atsam3x8e;
+use crate::device::Due;
 
 struct App {
-    sam3: Atsam3x8e,
+    due: Due,
 }
 
 impl App {
     pub(crate) fn new() -> Self {
         let mut a = Self {
-            sam3: Atsam3x8e::new(),
+            due: Due::new(),
         };
         a._init();
         a
     }
 
     fn _init(&mut self) {
-        self.sam3.piob_start_clock();
-        self.sam3.led_on();
+        self.due.piob_start_clock();
+        self.due.led_enable();
+        self.due.led_off();
         // Configure RTT resolution to approx 1 ms
-        self.sam3.rtt_set_resolution(0x20);
+        self.due.rtt_set_resolution(0x20);
     }
 
     fn run(&mut self) -> ! {
         loop {
-            self.sam3.led_on();
-            self.sam3.delay_ms(1000);
-            self.sam3.led_off();
-            self.sam3.delay_ms(1000);
+            self.due.led_on();
+            self.due.delay_ms(1000);
+            self.due.led_off();
+            self.due.delay_ms(1000);
         }
     }
 }
