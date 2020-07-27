@@ -9,6 +9,7 @@ readme = "README.md"
 
 [dependencies]
 atsam3x8e = { git = "https://github.com/compenguy/atsam3x8e.git", features = ["rt"] }
+atsam3x8e-hal = { git = "https://github.com/compenguy/atsam3x8e-hal.git", features = ["atsam3x8e-rt"] }
 cortex-m-rt = "0.6"
 cortex-m = "0.6"
 # Put a breakpoint on `rust_begin_unwind` to catch panics:
@@ -25,7 +26,7 @@ version = "0.2"
 default-features = false
 
 [features]
-rt = ["atsam3x8e/rt"]
+rt = ["atsam3x8e/rt", "atsam3x8e-hal/atsam3x8e-rt"]
 
 [profile.release]
 lto = true
