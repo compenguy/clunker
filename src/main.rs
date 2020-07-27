@@ -4,7 +4,7 @@
 use atsam3x8e as target_device;
 use atsam3x8e_hal as hal;
 use cortex_m_rt::entry;
-use embedded_hal::prelude::*;
+use hal::prelude::*;
 extern crate panic_halt;
 
 mod device;
