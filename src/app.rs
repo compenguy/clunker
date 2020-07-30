@@ -32,11 +32,9 @@ impl App {
         let delay = hal::delay::Delay::new(syst, clk.get_syscore());
 
         let mut a = Self { clk, delay, piob };
-        a._init();
+        a._enable_led();
         a
     }
-
-    fn _init(&mut self) {}
 
     fn _enable_led(&mut self) {
         self.clk
@@ -63,9 +61,9 @@ impl App {
     pub(crate) fn run(&mut self) -> ! {
         loop {
             self.led_on();
-            let _ = self.delay.try_delay_ms(5000u32);
+            let _ = self.delay.try_delay_ms(1000u32);
             self.led_off();
-            let _ = self.delay.try_delay_ms(5000u32);
+            let _ = self.delay.try_delay_ms(1000u32);
         }
     }
 }
