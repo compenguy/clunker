@@ -1,7 +1,7 @@
 [env]
 TARGET_NAME = "clunker"
 IMAGE_NAME = "image.bin"
-SERDEV_LINUX = "/dev/ttyACM0"
+SERDEV_LINUX = "ttyACM0"
 SERDEV_WINDOWS = "com8"
 
 [tasks.image]
@@ -15,7 +15,7 @@ windows_alias = "windows_init_serial"
 
 [tasks.linux_init_serial]
 command = "stty"
-args = ["-F", "${SERDEV_LINUX}", "raw", "ispeed", "1200", "ospeed", "1200", "cs8", "-cstopb", "ignpar", "eol", "255", "eof", "255"]
+args = ["-F", "/dev/${SERDEV_LINUX}", "speed", "1200", "cs8", "-cstopb", "-parenb"]
 
 [tasks.windows_init_serial]
 command = "mode"
@@ -23,5 +23,5 @@ args = ["${SERDEV_WINDOWS}:1200,n,8,1"]
 
 [tasks.flash]
 command = "bossac"
-args = ["-e", "-w", "-v", "-b", "-R", "${IMAGE_NAME}"]
+args = ["-p", "${SERDEV_LINUX}", "-e", "-w", "-v", "-b", "${IMAGE_NAME}"]
 dependencies = ["image", "init_serial"]
