@@ -23,5 +23,5 @@ args = ["${SERDEV_WINDOWS}:1200,n,8,1"]
 
 [tasks.flash]
 command = "bossac"
-args = ["-p", "${SERDEV_LINUX}", "-e", "-w", "-v", "-b", "${IMAGE_NAME}"]
+args = ["-p", "${SERDEV_LINUX}", "-e", "-w", "-v", "-b", "-R", "${IMAGE_NAME}"]
 dependencies = ["image", "init_serial"]
