@@ -1,5 +1,5 @@
 use atsam3x8e as target_device;
-use atsam3x8e_hal as hal;
+use atsam3xa_hal as hal;
 
 use hal::prelude::*;
 
@@ -40,7 +40,11 @@ impl App {
         // Toggle muxed sysio outputs to their peripheral outputs
         let _matrix = hal::bus::BusInterconnect::from(matrix);
 
-        let mut a = Self { clk, delay, led_pin };
+        let mut a = Self {
+            clk,
+            delay,
+            led_pin,
+        };
         a._enable_led();
         a
     }
