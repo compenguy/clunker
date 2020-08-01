@@ -6,7 +6,7 @@ use hal::prelude::*;
 pub(crate) struct App {
     clk: hal::clock::SystemClocks,
     delay: hal::delay::Delay<target_device::SYST>,
-    piob: atsam3x8e::PIOB,
+    led_pin: hal::gpio::Pb27<hal::gpio::Output<hal::gpio::PushPull>>,
 }
 
 impl App {
@@ -16,6 +16,7 @@ impl App {
             SUPC: supc,
             WDT: wdt,
             PIOB: piob,
+            MATRIX: matrix,
             ..
         } = atsam3x8e::Peripherals::take().expect("Failed to acquire device peripherals");
 
@@ -31,7 +32,15 @@ impl App {
         // configure blocking sleep delay object
         let delay = hal::delay::Delay::new(syst, clk.get_syscore());
 
-        let mut a = Self { clk, delay, piob };
+        // get PIOB so we can access the pin we need
+        let piob = hal::gpio::PioGroup::from(piob);
+        let mut led_pin = piob.p27().into_push_pull_output();
+        led_pin.set_low();
+
+        // Toggle muxed sysio outputs to their peripheral outputs
+        let _matrix = hal::bus::BusInterconnect::from(matrix);
+
+        let mut a = Self { clk, delay, led_pin };
         a._enable_led();
         a
     }
@@ -41,28 +50,12 @@ impl App {
             .state
             .enable_peripheral_clock(hal::clock::PeripheralID::Id12PioB);
 
-        // Configure PIOB pin 27 (LED)
-        // enable, set to output, disable pull-up resistor
-        self.piob.per.write_with_zero(|w| w.p27().set_bit());
-        self.piob.oer.write_with_zero(|w| w.p27().set_bit());
-        self.piob.pudr.write_with_zero(|w| w.p27().set_bit());
-
-        self.led_off();
-    }
-
-    pub(crate) fn led_off(&mut self) {
-        self.piob.codr.write_with_zero(|w| w.p27().set_bit());
-    }
-
-    pub(crate) fn led_on(&mut self) {
-        self.piob.sodr.write_with_zero(|w| w.p27().set_bit());
+        self.led_pin.set_low();
     }
 
     pub(crate) fn run(&mut self) -> ! {
         loop {
-            self.led_on();
-            let _ = self.delay.try_delay_ms(1000u32);
-            self.led_off();
+            self.led_pin.toggle();
             let _ = self.delay.try_delay_ms(1000u32);
         }
     }
